@@ -1,0 +1,18 @@
+{
+  "name": "setup-linters",
+  "version": "1.0.0",
+  "description": "Javascript GitHub Action to set up linters.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/cache": "^1.0.6",
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4",
+    "@actions/io": "^1.0.2",
+    "@actions/tool-cache": "^1.6.1"
+  }
+}
