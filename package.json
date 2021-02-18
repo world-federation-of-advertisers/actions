@@ -1,0 +1,6 @@
+{
+  "name": "actions",
+  "workspaces": [
+    "bazel-build-test"
+  ]
+}
