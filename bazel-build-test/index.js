@@ -58,7 +58,16 @@ async function run() {
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
   }
-  await cache.saveCache(cachePaths, cacheKey);
+
+  try {
+    await cache.saveCache(cachePaths, cacheKey);
+  } catch (err) {
+    if (err.name === cache.ReserveCacheError.name) {
+      core.warning(err);
+    } else {
+      throw err;
+    }
+  }
 }
 
 async function main() {
