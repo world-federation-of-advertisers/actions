@@ -40,7 +40,7 @@ async function run() {
   await exec.exec(
       'bazelisk', ['build', '--keep_going', '//...'], {cwd: workspacePath});
   const testExitCode = await exec.exec(
-      'bazelisk', ['test', '--keep_going', '//...'],
+      'bazelisk', ['test', '--keep_going', '--test_output=errors', '//...'],
       {cwd: workspacePath, ignoreReturnCode: true});
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
