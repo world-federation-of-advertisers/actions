@@ -22,3 +22,5 @@ inputs:
 runs:
   using: node12
   main: index.js
+  post: upload-testlogs.js
+  post-if: failure()

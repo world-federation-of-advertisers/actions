@@ -1,0 +1,75 @@
+# Copyright 2021 The Cross-Media Measurement Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Exercise the bazel-build-test action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  no-test-targets:
+    name: Run with no test targets
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out revision
+      uses: actions/checkout@v2
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'filegroup(name = "dummy_target")' > BUILD.bazel
+
+    - name: Build and test
+      uses: ./bazel-build-test
+      with:
+        workspace-path: .
+  passing-test-target:
+    name: Run with passing test target
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out revision
+      uses: actions/checkout@v2
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'true' > test.sh
+        chmod u+x test.sh
+        echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - name: Build and test
+      uses: ./bazel-build-test
+      with:
+        workspace-path: .
+  failing-test-target:
+    name: Run with failing test target
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out revision
+      uses: actions/checkout@v2
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'false' > test.sh
+        chmod u+x test.sh
+        echo 'sh_test(name = "failing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - name: Build and test
+      uses: ./bazel-build-test
+      with:
+        workspace-path: .

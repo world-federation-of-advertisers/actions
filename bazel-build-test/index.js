@@ -18,25 +18,12 @@ const core = require('@actions/core');
 const cache = require('@actions/cache');
 const exec = require('@actions/exec');
 
-const workspacePath = core.getInput('workspace-path');
+const {execBash, workspacePath} = require('./common');
+
 const validTestExitCodes = [
   0,  // Passes.
   4,  // No test targets.
 ];
-
-async function execBash(commands) {
-  const command = commands.join('\n');
-  const lines = [];
-  await exec.exec('bash', ['-c', command], {
-    cwd: workspacePath,
-    listeners: {
-      stdline: (line) => {
-        lines.push(line);
-      }
-    }
-  });
-  return lines.join('\n');
-}
 
 async function run() {
   const execRoot = await execBash(['bazelisk info execution_root']);
@@ -53,7 +40,7 @@ async function run() {
   await exec.exec(
       'bazelisk', ['build', '--keep_going', '//...'], {cwd: workspacePath});
   const testExitCode = await exec.exec(
-      'bazelisk', ['test', '--keep_going', '//...'],
+      'bazelisk', ['test', '--keep_going', '--test_output=errors', '//...'],
       {cwd: workspacePath, ignoreReturnCode: true});
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
