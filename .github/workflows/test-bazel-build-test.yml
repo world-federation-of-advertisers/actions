@@ -94,3 +94,30 @@ jobs:
         build-options: |
           --show_result=1024
           --test_summary=detailed
+  target-pattern:
+    name: Run with target pattern
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out revision
+        uses: actions/checkout@v2
+
+      - name: Init Bazel workspace
+        run: |
+          echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+          echo 'true' > test_1.sh
+          echo 'true' > test_2.sh
+          echo 'false' > test_to_ignore.sh
+          chmod u+x test_1.sh
+          chmod u+x test_2.sh
+          chmod u+x test_to_ignore.sh
+          echo 'sh_test(name = "passing_test_1", srcs = ["test_1.sh"])' > BUILD.bazel
+          echo 'sh_test(name = "passing_test_2", srcs = ["test_2.sh"])' >> BUILD.bazel
+          echo 'sh_test(name = "test_to_ignore", srcs = ["test_to_ignore.sh"])' >> BUILD.bazel
+
+      - name: Build and test
+        uses: ./bazel-build-test
+        with:
+          workspace-path: .
+          target-pattern: |
+            passing_test_1
+            passing_test_2

@@ -26,6 +26,10 @@ inputs:
       Options to pass to the Bazel build and test commands. Newline-delimited.
     required: false
     default: ''
+  target-pattern:
+    description: Bazel target to build and test
+    required: false
+    default: '//...'
 runs:
   using: node12
   main: index.js
