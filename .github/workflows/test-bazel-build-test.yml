@@ -73,3 +73,24 @@ jobs:
       uses: ./bazel-build-test
       with:
         workspace-path: .
+  build-options:
+    name: Run with build options
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out revision
+      uses: actions/checkout@v2
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'true' > test.sh
+        chmod u+x test.sh
+        echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - name: Build and test
+      uses: ./bazel-build-test
+      with:
+        workspace-path: .
+        build-options: |
+          --show_result=1024
+          --test_summary=detailed
