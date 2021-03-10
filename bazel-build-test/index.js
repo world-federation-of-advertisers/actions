@@ -55,13 +55,15 @@ async function run() {
     throw new Error('Testing failed');
   }
 
-  try {
-    await cache.saveCache(cachePaths, cacheKey);
-  } catch (err) {
-    if (err.name === cache.ReserveCacheError.name) {
-      core.warning(err);
-    } else {
-      throw err;
+  if (targetPattern.includes("//...")) {
+    try {
+      await cache.saveCache(cachePaths, cacheKey);
+    } catch (err) {
+      if (err.name === cache.ReserveCacheError.name) {
+        core.warning(err);
+      } else {
+        throw err;
+      }
     }
   }
 }
