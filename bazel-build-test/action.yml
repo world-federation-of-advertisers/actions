@@ -26,6 +26,11 @@ inputs:
       Options to pass to the Bazel build and test commands. Newline-delimited.
     required: false
     default: ''
+  restore-cache:
+    description: >-
+      Whether to restore any previously saved Bazel workspace cache. Boolean.
+    required: false
+    default: true
 runs:
   using: node12
   main: index.js
