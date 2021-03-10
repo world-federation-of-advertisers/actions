@@ -18,7 +18,7 @@ const core = require('@actions/core');
 const cache = require('@actions/cache');
 const exec = require('@actions/exec');
 
-const {execBash, workspacePath} = require('./common');
+const {execBash, getInputBool, workspacePath} = require('./common');
 
 const validTestExitCodes = [
   0,  // Passes.
@@ -33,9 +33,11 @@ async function run() {
   const outputBase = await execBash(['bazelisk info output_base'])
 
   const cacheKey = `bazel-${execRootHash}-${treeHash}`;
-  const restoreKeys = [`bazel-${execRootHash}-`];
   const cachePaths = [outputBase];
-  await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
+  if (getInputBool('restore-cache')) {
+    const restoreKeys = [`bazel-${execRootHash}-`];
+    await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
+  }
 
   const buildOptions = ['--keep_going'].concat(
       core.getInput('build-options').split('\n').filter(value => value !== ''));

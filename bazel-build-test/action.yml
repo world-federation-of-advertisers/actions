@@ -26,6 +26,11 @@ inputs:
       Options to pass to the Bazel build and test commands. Newline-delimited.
     required: false
     default: ''
+  restore-cache:
+    description: >-
+      Whether to restore any previously saved Bazel workspace cache. Boolean.
+    required: false
+    default: true
   target-pattern:
     description: Bazel target to build and test
     required: false
