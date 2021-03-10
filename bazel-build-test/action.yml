@@ -19,6 +19,13 @@ inputs:
     description: Path of Bazel workspace
     required: true
     default: .
+  build-options:
+    # TODO(actions/toolkit#184): Use list type rather than newline-delimited
+    # string once it's available.
+    description: >-
+      Options to pass to the Bazel build and test commands. Newline-delimited.
+    required: false
+    default: ''
 runs:
   using: node12
   main: index.js
