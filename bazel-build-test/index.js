@@ -41,7 +41,7 @@ async function run() {
       core.getInput('build-options').split('\n').filter(value => value !== ''));
   const testOptions = ['--test_output=errors'].concat(buildOptions);
   const targetPattern =
-      core.getInput('target-pattern').split('\n').filter(value => value !== ''));
+      core.getInput('target-pattern').split('\n').filter(value => value !== '');
 
   await exec.exec(
       'bazelisk', ['build'].concat(buildOptions).concat(targetPattern),
