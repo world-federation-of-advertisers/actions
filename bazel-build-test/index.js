@@ -37,10 +37,15 @@ async function run() {
   const cachePaths = [outputBase];
   await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
 
+  const buildOptions = ['--keep_going'].concat(
+      core.getInput('build-options').split('\n').filter(value => value !== ''));
+  const testOptions = ['--test_output=errors'].concat(buildOptions);
+
   await exec.exec(
-      'bazelisk', ['build', '--keep_going', '//...'], {cwd: workspacePath});
+      'bazelisk', ['build'].concat(buildOptions).concat(['//...']),
+      {cwd: workspacePath});
   const testExitCode = await exec.exec(
-      'bazelisk', ['test', '--keep_going', '--test_output=errors', '//...'],
+      'bazelisk', ['test'].concat(testOptions).concat(['//...']),
       {cwd: workspacePath, ignoreReturnCode: true});
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
@@ -57,12 +62,10 @@ async function run() {
   }
 }
 
-async function main() {
+(async function() {
   try {
     await run();
   } catch (err) {
     core.setFailed(err);
   }
-}
-
-main();
+}());
