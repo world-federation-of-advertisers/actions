@@ -42,8 +42,8 @@ async function run() {
   const buildOptions = ['--keep_going'].concat(
       core.getInput('build-options').split('\n').filter(value => value !== ''));
   const testOptions = ['--test_output=errors'].concat(buildOptions);
-  const targetPattern =
-      core.getInput('target-pattern').split('\n').filter(value => value !== '');
+  const targetPatterns =
+      core.getInput('target-patterns').split('\n').filter(value => value !== '');
 
   await exec.exec(
       'bazelisk', ['build'].concat(buildOptions).concat(targetPattern),
@@ -55,7 +55,7 @@ async function run() {
     throw new Error('Testing failed');
   }
 
-  if (targetPattern.includes("//...")) {
+  if (targetPatterns.includes("//...")) {
     try {
       await cache.saveCache(cachePaths, cacheKey);
     } catch (err) {

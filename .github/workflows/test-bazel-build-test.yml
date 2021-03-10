@@ -94,7 +94,7 @@ jobs:
         build-options: |
           --show_result=1024
           --test_summary=detailed
-  target-pattern:
+  target-patterns:
     name: Run with target pattern
     runs-on: ubuntu-20.04
     steps:
@@ -118,6 +118,6 @@ jobs:
         uses: ./bazel-build-test
         with:
           workspace-path: .
-          target-pattern: |
+          target-patterns: |
             passing_test_1
             passing_test_2

@@ -31,8 +31,8 @@ inputs:
       Whether to restore any previously saved Bazel workspace cache. Boolean.
     required: false
     default: true
-  target-pattern:
-    description: Bazel target to build and test
+  target-patterns:
+    description: Bazel targets to build and test. Newline-delimited.
     required: false
     default: '//...'
 runs:
