@@ -46,10 +46,10 @@ async function run() {
       core.getInput('target-patterns').split('\n').filter(value => value !== '');
 
   await exec.exec(
-      'bazelisk', ['build'].concat(buildOptions).concat(targetPattern),
+      'bazelisk', ['build'].concat(buildOptions).concat(targetPatterns),
       {cwd: workspacePath});
   const testExitCode = await exec.exec(
-      'bazelisk', ['test'].concat(testOptions).concat(targetPattern),
+      'bazelisk', ['test'].concat(testOptions).concat(targetPatterns),
       {cwd: workspacePath, ignoreReturnCode: true});
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
