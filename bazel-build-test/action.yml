@@ -31,6 +31,10 @@ inputs:
       Whether to restore any previously saved Bazel workspace cache. Boolean.
     required: false
     default: true
+  target-patterns:
+    description: Bazel targets to build and test. Newline-delimited.
+    required: false
+    default: '//...'
 runs:
   using: node12
   main: index.js

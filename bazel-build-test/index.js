@@ -42,24 +42,28 @@ async function run() {
   const buildOptions = ['--keep_going'].concat(
       core.getInput('build-options').split('\n').filter(value => value !== ''));
   const testOptions = ['--test_output=errors'].concat(buildOptions);
+  const targetPatterns =
+      core.getInput('target-patterns').split('\n').filter(value => value !== '');
 
   await exec.exec(
-      'bazelisk', ['build'].concat(buildOptions).concat(['//...']),
+      'bazelisk', ['build'].concat(buildOptions).concat(targetPatterns),
       {cwd: workspacePath});
   const testExitCode = await exec.exec(
-      'bazelisk', ['test'].concat(testOptions).concat(['//...']),
+      'bazelisk', ['test'].concat(testOptions).concat(targetPatterns),
       {cwd: workspacePath, ignoreReturnCode: true});
   if (!validTestExitCodes.includes(testExitCode)) {
     throw new Error('Testing failed');
   }
 
-  try {
-    await cache.saveCache(cachePaths, cacheKey);
-  } catch (err) {
-    if (err.name === cache.ReserveCacheError.name) {
-      core.warning(err);
-    } else {
-      throw err;
+  if (targetPatterns.includes("//...")) {
+    try {
+      await cache.saveCache(cachePaths, cacheKey);
+    } catch (err) {
+      if (err.name === cache.ReserveCacheError.name) {
+        core.warning(err);
+      } else {
+        throw err;
+      }
     }
   }
 }
