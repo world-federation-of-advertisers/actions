@@ -32,7 +32,8 @@ async function run() {
   const treeHash = await execBash(['git rev-parse HEAD:']);
   const outputBase = await execBash(['bazelisk info output_base'])
 
-  const cacheKey = `bazel-${execRootHash}-${treeHash}`;
+  const cacheVersion = core.getInput('cache-version');
+  const cacheKey = `bazel-${cacheVersion}-${execRootHash}-${treeHash}`;
   const cachePaths = [outputBase];
   if (getInputBool('restore-cache')) {
     const restoreKeys = [`bazel-${execRootHash}-`];

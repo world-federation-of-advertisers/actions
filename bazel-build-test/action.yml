@@ -19,6 +19,10 @@ inputs:
     description: Path of Bazel workspace
     required: true
     default: .
+  cache-version:
+    description: Version of the GitHub Actions cache key.
+    required: false
+    default: 0
   build-options:
     # TODO(actions/toolkit#184): Use list type rather than newline-delimited
     # string once it's available.
