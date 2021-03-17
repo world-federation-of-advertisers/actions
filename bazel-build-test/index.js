@@ -36,7 +36,7 @@ async function run() {
   const cacheKey = `bazel-${cacheVersion}-${execRootHash}-${treeHash}`;
   const cachePaths = [outputBase];
   if (getInputBool('restore-cache')) {
-    const restoreKeys = [`bazel-${execRootHash}-`];
+    const restoreKeys = [`bazel-${cacheVersion}-${execRootHash}-`];
     await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
   }
 
