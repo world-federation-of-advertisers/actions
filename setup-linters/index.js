@@ -28,7 +28,7 @@ const EXECUTABLE_MODE = 0o755;
 const tools = Object.freeze({
   addlicense: buildTool('addlicense', '0.0.0-20200906110928-a0294312aa76'),
   buildifier: buildTool('buildifier', '4.0.0'),
-  java_format: buildTool('google-java-format.jar', '1.9'),
+  googleJavaFormat: buildTool('google-java-format.jar', '1.9'),
   ktlint: buildTool('ktlint', '0.40.0'),
 });
 
@@ -85,7 +85,7 @@ async function installKtlint() {
 }
 
 async function installGoogleJavaFormat() {
-  const tool = tools.java_format;
+  const tool = tools.googleJavaFormat;
   core.info(`Installing ${tool.name}`);
   if (!await tool.restore()) {
     core.info(`Downloading ${tool.name}`);
