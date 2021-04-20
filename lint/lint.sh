@@ -95,6 +95,17 @@ addlicense_cmd() {
   echo 'Done' >&2
 }
 
+ktfmt_cmd() {
+  # ktfmt doesn't have a "check" or "dry run" mode, so we format files in-place
+  # and check if there are any diffs.
+  ktfmt --google-style "$@"
+  git diff --exit-code -- "$@" || {
+    echo 'ktfmt produced diffs' >&2
+    git reset --hard
+    return 1
+  }
+}
+
 ktlint_cmd() {
   ktlint --relative "$@" 1>&2
 }
@@ -151,6 +162,7 @@ main() {
   local -i has_errors=0
 
   run_linter addlicense_cmd "${ALL_FILES_PATTERN}" || has_errors=1
+  run_linter ktfmt_cmd "${KOTLIN_PATTERN}" || has_errors=1
   run_linter ktlint_cmd "${KOTLIN_PATTERN}" || has_errors=1
   run_linter buildifier_cmd "${BAZEL_PATTERN}" || has_errors=1
   run_linter clang_format_cmd "${CPP_OR_PROTO_PATTERN}" || has_errors=1
