@@ -28,16 +28,20 @@ const EXECUTABLE_MODE = 0o755;
 const tools = Object.freeze({
   addlicense: buildTool('addlicense', '0.0.0-20200906110928-a0294312aa76'),
   buildifier: buildTool('buildifier', '4.0.0'),
-  googleJavaFormat: buildTool('google-java-format.jar', '1.9'),
+  googleJavaFormat: buildTool('google-java-format', '1.9', '.jar'),
+  ktfmt: buildTool('ktfmt', '0.24', '.jar'),
   ktlint: buildTool('ktlint', '0.40.0'),
 });
 
-function buildTool(name, version) {
+function buildTool(name, version, ext = '') {
+  const basename = name + ext;
+
   return {
     name: name,
     version: version,
-    path: path.join(LINTERS_PATH, name),
-    cacheKey: [name, version].join('-'),
+    basename: basename,
+    path: path.join(LINTERS_PATH, basename),
+    cacheKey: [basename, version].join('-'),
 
     async save() {
       const cacheId = await cache.saveCache([this.path], this.cacheKey);
@@ -84,22 +88,43 @@ async function installKtlint() {
           tool.version}/ktlint`);
 }
 
+async function writeJarScript(tool) {
+  const script = `#!/usr/bin/env bash
+  exec -a ${tool.name} java -jar ${tool.path} "$@"`;
+  const scriptPath = path.join(LINTERS_PATH, tool.name);
+  await fsPromises.writeFile(scriptPath, script, {mode: EXECUTABLE_MODE});
+}
+
 async function installGoogleJavaFormat() {
   const tool = tools.googleJavaFormat;
   core.info(`Installing ${tool.name}`);
   if (!await tool.restore()) {
     core.info(`Downloading ${tool.name}`);
+    const url =
+        'https://github.com/google/google-java-format/releases/download/' +
+        `google-java-format-${tool.version}/` +
+        `google-java-format-${tool.version}-all-deps.jar`;
+
+    await tc.downloadTool(url, tool.path);
+    await tool.save();
+  }
+
+  await writeJarScript(tool);
+}
+
+async function installKtfmt() {
+  const tool = tools.ktfmt;
+  core.info(`Installing ${tool.name}`);
+  if (!await tool.restore()) {
+    core.info(`Downloading ${tool.name}`);
     await tc.downloadTool(
-        `https://github.com/google/google-java-format/releases/download/google-java-format-${
-            tool.version}/google-java-format-${tool.version}-all-deps.jar`,
+        `https://search.maven.org/remotecontent?filepath=com/facebook/ktfmt/${
+            tool.version}/ktfmt-${tool.version}-jar-with-dependencies.jar`,
         tool.path);
     await tool.save();
   }
 
-  const script = `#!/usr/bin/env bash
-  java -jar ${tool.path} "$@"`;
-  const scriptPath = path.join(LINTERS_PATH, path.basename(tool.path, '.jar'));
-  await fsPromises.writeFile(scriptPath, script, {mode: EXECUTABLE_MODE});
+  await writeJarScript(tool);
 }
 
 async function installAddlicense() {
@@ -122,7 +147,7 @@ async function installAddlicense() {
   await exec.exec('go', ['build', '-ldflags=-s', goPackage], execOptions);
 
   // Copy to linters directory and save.
-  await io.cp(path.join(tmpdir, tool.name), tool.path);
+  await io.cp(path.join(tmpdir, tool.basename), tool.path);
   await tool.save();
 }
 
@@ -131,6 +156,7 @@ async function run() {
     await fsPromises.mkdir(LINTERS_PATH, {recursive: true});
     await Promise.all([
       installBuildifier(),
+      installKtfmt(),
       installKtlint(),
       installGoogleJavaFormat(),
       installAddlicense(),
