@@ -44,9 +44,17 @@ function buildTool(name, version, ext = '') {
     cacheKey: [basename, version].join('-'),
 
     async save() {
-      const cacheId = await cache.saveCache([this.path], this.cacheKey);
-      core.info(`Saved ${this.cacheKey} to cache`);
-      return cacheId;
+      try {
+        const cacheId = await cache.saveCache([this.path], this.cacheKey);
+        core.info(`Saved ${this.cacheKey} to cache`);
+        return cacheId;
+      } catch (err) {
+        if (err.name === cache.ReserveCacheError.name) {
+          core.warning(err);
+        } else {
+          throw err;
+        }
+      }
     },
 
     async restore() {
