@@ -29,7 +29,7 @@ const tools = Object.freeze({
   addlicense: buildTool('addlicense', '0.0.0-20200906110928-a0294312aa76'),
   buildifier: buildTool('buildifier', '4.0.0'),
   googleJavaFormat: buildTool('google-java-format', '1.9', '.jar'),
-  ktfmt: buildTool('ktfmt', '0.24', '.jar'),
+  ktfmt: buildTool('ktfmt', '0.27', '.jar'),
   ktlint: buildTool('ktlint', '0.40.0'),
 });
 
