@@ -23,6 +23,14 @@ inputs:
     description: Version of the GitHub Actions cache key.
     required: false
     default: 0
+  cache-save-events:
+    # TODO(actions/toolkit#184): Use list type rather than newline-delimited
+    # string once it's available.
+    description: >-
+      Workflow trigger event names which the Bazel workspace cache is saved.
+      Newline-delimited.
+    required: false
+    default: push
   build-options:
     # TODO(actions/toolkit#184): Use list type rather than newline-delimited
     # string once it's available.

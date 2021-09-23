@@ -17,6 +17,7 @@
 const core = require('@actions/core');
 const cache = require('@actions/cache');
 const exec = require('@actions/exec');
+const github = require('@actions/github');
 
 const {execBash, getInputBool, workspacePath} = require('./common');
 
@@ -40,11 +41,10 @@ async function run() {
     await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
   }
 
-  const buildOptions = ['--keep_going'].concat(
-      core.getInput('build-options').split('\n').filter(value => value !== ''));
+  const buildOptions =
+      ['--keep_going'].concat(core.getMultilineInput('build-options'));
   const testOptions = ['--test_output=errors'].concat(buildOptions);
-  const targetPatterns =
-      core.getInput('target-patterns').split('\n').filter(value => value !== '');
+  const targetPatterns = core.getMultilineInput('target-patterns');
 
   await exec.exec(
       'bazelisk', ['build'].concat(buildOptions).concat(targetPatterns),
@@ -56,7 +56,9 @@ async function run() {
     throw new Error('Testing failed');
   }
 
-  if (targetPatterns.includes("//...")) {
+  const cacheSaveEvents = core.getMultilineInput('cache-save-events');
+  if (targetPatterns.includes('//...') &&
+      cacheSaveEvents.includes(github.context.eventName)) {
     try {
       await cache.saveCache(cachePaths, cacheKey);
     } catch (err) {

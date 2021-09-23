@@ -73,6 +73,9 @@ jobs:
       uses: ./bazel-build-test
       with:
         workspace-path: .
+        cache-save-events: |
+          pull_request
+          push
   build-options:
     name: Run with build options
     runs-on: ubuntu-20.04
@@ -91,6 +94,9 @@ jobs:
       uses: ./bazel-build-test
       with:
         workspace-path: .
+        cache-save-events: |
+          pull_request
+          push
         build-options: |
           --show_result=1024
           --test_summary=detailed
@@ -118,6 +124,9 @@ jobs:
         uses: ./bazel-build-test
         with:
           workspace-path: .
+          cache-save-events: |
+            pull_request
+            push
           target-patterns: |
             passing_test_1
             passing_test_2
