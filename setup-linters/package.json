@@ -1,6 +1,6 @@
 {
   "name": "setup-linters",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Javascript GitHub Action to set up linters.",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,6 @@
   "dependencies": {
     "@actions/cache": "^1.0.7",
     "@actions/core": "^1.5.0",
-    "@actions/exec": "^1.1.0",
     "@actions/io": "^1.1.1",
     "@actions/tool-cache": "^1.7.1"
   }

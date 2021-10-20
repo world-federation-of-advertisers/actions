@@ -16,34 +16,57 @@
 
 const cache = require('@actions/cache');
 const core = require('@actions/core');
-const exec = require('@actions/exec');
+const crypto = require('crypto');
+const fs = require('fs');
 const io = require('@actions/io');
 const path = require('path');
 const tc = require('@actions/tool-cache');
-const {promises: fsPromises} = require('fs');
+const fsPromises = fs.promises;
 
 const LINTERS_PATH = path.join(process.env.HOME, 'lint');
 const EXECUTABLE_MODE = 0o755;
 
 const tools = Object.freeze({
-  addlicense: buildTool('addlicense', '0.0.0-20200906110928-a0294312aa76'),
-  buildifier: buildTool('buildifier', '4.0.0'),
-  googleJavaFormat: buildTool('google-java-format', '1.9', '.jar'),
-  ktfmt: buildTool('ktfmt', '0.27', '.jar'),
-  ktlint: buildTool('ktlint', '0.40.0'),
+  addlicense: buildTool(
+      'addlicense', '1.0.0',
+      'ac53b538d315abfb1c6e2cec5c6a7886397f1d1738a6b7abe6af2159ce614bee'),
+  buildifier: buildTool(
+      'buildifier', '4.0.0',
+      'db81208c4e6f0f31dc33efaf9373c29c78b5295198cf16e4778e3e9211b57b0b'),
+  googleJavaFormat: buildTool(
+      'google-java-format', '1.9',
+      '1d98720a5984de85a822aa32a378eeacd4d17480d31cba6e730caae313466b97',
+      '.jar'),
+  ktfmt: buildTool(
+      'ktfmt', '0.27',
+      '280c86b7a5f7cdbeb32a6890c8c2b4edf1b4eb2d5786a6b074add7dbf2fcfd16',
+      '.jar'),
+  ktlint: buildTool(
+      'ktlint', '0.40.0',
+      '4739662e9ac9a9894a1eb47844cbb5610971f15af332eac94d108d4f55ebc19e'),
 });
 
-function buildTool(name, version, ext = '') {
+function buildTool(name, version, sha256, ext = '') {
   const basename = name + ext;
 
   return {
     name: name,
     version: version,
+    sha256: sha256,
     basename: basename,
     path: path.join(LINTERS_PATH, basename),
-    cacheKey: [basename, version].join('-'),
+    cacheKey: [basename, version, sha256].join('-'),
+
+    async validate() {
+      const actualSha256 = await sha256HashFile(this.path);
+      if (this.sha256 !== actualSha256) {
+        throw Error(`Expected SHA256 ${this.sha256} for ${this.name}-${
+            this.version}, got ${actualSha256}`)
+      }
+    },
 
     async save() {
+      await this.validate();
       try {
         const cacheId = await cache.saveCache([this.path], this.cacheKey);
         core.info(`Saved ${this.cacheKey} to cache`);
@@ -59,12 +82,36 @@ function buildTool(name, version, ext = '') {
 
     async restore() {
       const restoredKey = await cache.restoreCache([this.path], this.cacheKey);
-      if (restoredKey) {
-        core.info(`Restored ${this.cacheKey} from cache`);
+      if (!restoredKey) {
+        return restoredKey;
       }
+
+      try {
+        await this.validate();
+      } catch (err) {
+        core.warning(err);
+        await io.rmRF(this.path);
+        return undefined;
+      }
+      core.info(`Restored ${this.cacheKey} from cache`);
       return restoredKey;
     },
   };
+}
+
+function sha256HashFile(path) {
+  const hash = crypto.createHash('sha256').setEncoding('hex');
+  // TODO(actions/runner#772): Switch to using fs Promises API to create read
+  // stream once GitHub's JS actions can be run with Node.js 16+.
+  const input = fs.createReadStream(path);
+  return new Promise((resolve, reject) => {
+    input.on('end', () => {
+      hash.end();
+      resolve(hash.read());
+    });
+    input.on('error', reject);
+    input.pipe(hash);
+  });
 }
 
 async function installExecutable(tool, url) {
@@ -142,17 +189,18 @@ async function installAddlicense() {
     return;
   }
 
-  // Build tool in temporary directory.
+  // Download archive to temporary directory.
   const tmpdir =
       await fsPromises.mkdtemp(path.join(process.env.RUNNER_TEMP, tool.name));
-  const goPackage = 'github.com/google/addlicense';
-  core.info(`Downloading ${tool.name} source`);
-  const execOptions = {cwd: tmpdir};
-  await exec.exec('go', ['mod', 'init', 'temp'], execOptions);
-  await exec.exec(
-      'go', ['get', '-u', '-d', `${goPackage}@v${tool.version}`], execOptions);
-  core.info(`Building ${tool.name}`);
-  await exec.exec('go', ['build', '-ldflags=-s', goPackage], execOptions);
+  const archiveName = tool.basename + '.tar.gz';
+  const archivePath = path.join(tmpdir, archiveName);
+  await tc.downloadTool(
+      `https://github.com/google/addlicense/releases/download/v${
+          tool.version}/addlicense_${tool.version}_Linux_x86_64.tar.gz`,
+      archivePath);
+
+  // Extract tool from archive.
+  await tc.extractTar(archivePath, tmpdir);
 
   // Copy to linters directory and save.
   await io.cp(path.join(tmpdir, tool.basename), tool.path);
