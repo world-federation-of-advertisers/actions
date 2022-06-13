@@ -31,15 +31,15 @@ const tools = Object.freeze({
       'addlicense', '1.0.0',
       'ac53b538d315abfb1c6e2cec5c6a7886397f1d1738a6b7abe6af2159ce614bee'),
   buildifier: buildTool(
-      'buildifier', '4.0.0',
-      'db81208c4e6f0f31dc33efaf9373c29c78b5295198cf16e4778e3e9211b57b0b'),
+      'buildifier', '5.1.0',
+      '52bf6b102cb4f88464e197caac06d69793fa2b05f5ad50a7e7bf6fbd656648a3'),
   googleJavaFormat: buildTool(
-      'google-java-format', '1.9',
-      '1d98720a5984de85a822aa32a378eeacd4d17480d31cba6e730caae313466b97',
+      'google-java-format', '1.15.0',
+      'a356bb0236b29c57a3ab678f17a7b027aad603b0960c183a18f1fe322e4f38ea',
       '.jar'),
   ktfmt: buildTool(
-      'ktfmt', '0.34',
-      'f800909a55864f45bc87842a588dd2d9b1a51110b6566b2b4c6aff28786f28b4',
+      'ktfmt', '0.38',
+      'd0a5706cb5e50902aed4afa549fe3b6174b4717d104f1332a2fd26619a2b74be',
       '.jar'),
   ktlint: buildTool(
       'ktlint', '0.40.0',
@@ -157,8 +157,7 @@ async function installGoogleJavaFormat() {
     core.info(`Downloading ${tool.name}`);
     const url =
         'https://github.com/google/google-java-format/releases/download/' +
-        `google-java-format-${tool.version}/` +
-        `google-java-format-${tool.version}-all-deps.jar`;
+        `v${tool.version}/google-java-format-${tool.version}-all-deps.jar`;
 
     await tc.downloadTool(url, tool.path);
     await tool.save();
