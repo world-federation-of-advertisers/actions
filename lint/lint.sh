@@ -24,6 +24,7 @@ readonly BAZEL_PATTERN='BUILD(\.bazel)?$|\.bzl$'
 readonly CPP_OR_PROTO_PATTERN='\.(cc|h|proto)$'
 readonly CPP_PATTERN='\.(cc|h)$'
 readonly JAVA_PATTERN='\.java$'
+readonly CUE_PATTERN='\.cue$'
 
 # Reads exclude pathspecs from the .lintignore file into the specified array.
 read_exclude_pathspecs() {
@@ -106,8 +107,15 @@ ktfmt_cmd() {
   }
 }
 
-ktlint_cmd() {
-  ktlint --relative "$@" 1>&2
+cue_fmt_cmd() {
+  # cue fmt doesn't have a "check" or "dry run" mode, so we format files
+  # in-place and check if there are any diffs.
+  cue fmt "$@"
+  git diff --exit-code -- "$@" || {
+    echo 'cue fmt produced diffs' >&2
+    git reset --hard
+    return 1
+  }
 }
 
 buildifier_cmd() {
@@ -163,11 +171,11 @@ main() {
 
   run_linter addlicense_cmd "${ALL_FILES_PATTERN}" || has_errors=1
   run_linter ktfmt_cmd "${KOTLIN_PATTERN}" || has_errors=1
-  run_linter ktlint_cmd "${KOTLIN_PATTERN}" || has_errors=1
   run_linter buildifier_cmd "${BAZEL_PATTERN}" || has_errors=1
   run_linter clang_format_cmd "${CPP_OR_PROTO_PATTERN}" || has_errors=1
   run_linter cpplint_cmd "${CPP_PATTERN}" || has_errors=1
   run_linter google_java_format_cmd "${JAVA_PATTERN}" || has_errors=1
+  run_linter cue_fmt_cmd "${CUE_PATTERN}" || has_errors=1
 
   ! ((has_errors))
 }
