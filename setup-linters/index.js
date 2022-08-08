@@ -38,12 +38,12 @@ const tools = Object.freeze({
       'a356bb0236b29c57a3ab678f17a7b027aad603b0960c183a18f1fe322e4f38ea',
       '.jar'),
   ktfmt: buildTool(
-      'ktfmt', '0.38',
-      'd0a5706cb5e50902aed4afa549fe3b6174b4717d104f1332a2fd26619a2b74be',
+      'ktfmt', '0.39',
+      '72bd918f3e36c18561eefa7eba08221ae80086deccbaf81305710ec421041d8d',
       '.jar'),
-  ktlint: buildTool(
-      'ktlint', '0.40.0',
-      '4739662e9ac9a9894a1eb47844cbb5610971f15af332eac94d108d4f55ebc19e'),
+  cue: buildTool(
+      'cue', '0.4.3',
+      '052063f3231aca8c2093ce96bc0a38328a45a6b77d5244f5e6ed08e19c79200a'),
 });
 
 function buildTool(name, version, sha256, ext = '') {
@@ -115,6 +115,7 @@ function sha256HashFile(path) {
 }
 
 async function installExecutable(tool, url) {
+  core.info(`Installing ${tool.name}`);
   if (await tool.restore()) {
     return;
   }
@@ -125,22 +126,33 @@ async function installExecutable(tool, url) {
   await tool.save();
 }
 
+async function installExecutableFromArchive(tool, url) {
+  core.info(`Installing ${tool.name}`);
+  if (await tool.restore()) {
+    return;
+  }
+
+  // Download archive to temporary directory.
+  const tmpdir =
+      await fsPromises.mkdtemp(path.join(process.env.RUNNER_TEMP, tool.name));
+  const archiveName = tool.basename + '.tar.gz';
+  const archivePath = path.join(tmpdir, archiveName);
+  await tc.downloadTool(url, archivePath);
+
+  // Extract tool from archive.
+  await tc.extractTar(archivePath, tmpdir);
+
+  // Copy to linters directory and save.
+  await io.cp(path.join(tmpdir, tool.basename), tool.path);
+  await tool.save();
+}
+
 async function installBuildifier() {
   const tool = tools.buildifier;
-  core.info(`Installing ${tool.name}`);
   await installExecutable(
       tool,
       `https://github.com/bazelbuild/buildtools/releases/download/${
           tool.version}/buildifier-linux-amd64`);
-}
-
-async function installKtlint() {
-  const tool = tools.ktlint;
-  core.info(`Installing ${tool.name}`);
-  await installExecutable(
-      tool,
-      `https://github.com/pinterest/ktlint/releases/download/${
-          tool.version}/ktlint`);
 }
 
 async function writeJarScript(tool) {
@@ -183,27 +195,18 @@ async function installKtfmt() {
 
 async function installAddlicense() {
   const tool = tools.addlicense;
-  core.info(`Installing ${tool.name}`);
-  if (await tool.restore()) {
-    return;
-  }
+  await installExecutableFromArchive(
+      tool,
+      `https://github.com/google/${tool.name}/releases/download/v${
+          tool.version}/${tool.name}_${tool.version}_Linux_x86_64.tar.gz`);
+}
 
-  // Download archive to temporary directory.
-  const tmpdir =
-      await fsPromises.mkdtemp(path.join(process.env.RUNNER_TEMP, tool.name));
-  const archiveName = tool.basename + '.tar.gz';
-  const archivePath = path.join(tmpdir, archiveName);
-  await tc.downloadTool(
-      `https://github.com/google/addlicense/releases/download/v${
-          tool.version}/addlicense_${tool.version}_Linux_x86_64.tar.gz`,
-      archivePath);
-
-  // Extract tool from archive.
-  await tc.extractTar(archivePath, tmpdir);
-
-  // Copy to linters directory and save.
-  await io.cp(path.join(tmpdir, tool.basename), tool.path);
-  await tool.save();
+async function installCue() {
+  const tool = tools.cue;
+  await installExecutableFromArchive(
+      tool,
+      `https://github.com/cue-lang/${tool.name}/releases/download/v${
+          tool.version}/${tool.name}_v${tool.version}_linux_amd64.tar.gz`);
 }
 
 async function run() {
@@ -212,9 +215,9 @@ async function run() {
     await Promise.all([
       installBuildifier(),
       installKtfmt(),
-      installKtlint(),
       installGoogleJavaFormat(),
       installAddlicense(),
+      installCue(),
     ]);
     core.addPath(LINTERS_PATH);
   } catch (err) {
