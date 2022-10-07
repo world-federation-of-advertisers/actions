@@ -19,7 +19,7 @@ const core = require('@actions/core');
 const fs = require('fs');
 const glob = require('@actions/glob');
 
-const {execBash, workspacePath} = require('./common');
+const {buildOptions, execBash} = require('./common');
 
 async function findFiles(dir) {
   const files = [];
@@ -35,7 +35,9 @@ async function findFiles(dir) {
 }
 
 async function run() {
-  const testlogsPath = await execBash(['bazelisk info bazel-testlogs']);
+  const command =
+      ['bazelisk'].concat(buildOptions).concat(['info', 'bazel-testlogs']);
+  const testlogsPath = await execBash([command.join(' ')]);
   const files = await findFiles(testlogsPath);
   if (files.length === 0) {
     core.info('No test logs found; skipping upload');

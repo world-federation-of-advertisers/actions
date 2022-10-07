@@ -23,6 +23,7 @@ const YAML_TRUE_VALUES = Object.freeze(['true', 'True', 'TRUE']);
 const YAML_FALSE_VALUES = Object.freeze(['false', 'False', 'FALSE']);
 
 const workspacePath = core.getInput('workspace-path');
+const buildOptions = core.getMultilineInput('build-options');
 
 async function execBash(commands) {
   const command = commands.join('\n');
@@ -58,6 +59,7 @@ function getInputBool(name) {
 }
 
 module.exports = {
+  buildOptions: buildOptions,
   workspacePath: workspacePath,
   execBash: execBash,
   getInputBool: getInputBool,

@@ -19,7 +19,8 @@ const cache = require('@actions/cache');
 const exec = require('@actions/exec');
 const github = require('@actions/github');
 
-const {execBash, getInputBool, workspacePath} = require('./common');
+const common = require('./common');
+const {execBash, getInputBool, workspacePath} = common;
 
 const validTestExitCodes = [
   0,  // Passes.
@@ -41,8 +42,7 @@ async function run() {
     await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
   }
 
-  const buildOptions =
-      ['--keep_going'].concat(core.getMultilineInput('build-options'));
+  const buildOptions = ['--keep_going'].concat(common.buildOptions);
   const testOptions = ['--test_output=errors'].concat(buildOptions);
   const targetPatterns = core.getMultilineInput('target-patterns');
 
