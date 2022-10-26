@@ -76,6 +76,8 @@ jobs:
         cache-save-events: |
           pull_request
           push
+        build-options: |
+          --compilation_mode=opt
   build-options:
     name: Run with build options
     runs-on: ubuntu-20.04

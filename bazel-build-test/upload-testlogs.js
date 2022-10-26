@@ -36,7 +36,7 @@ async function findFiles(dir) {
 
 async function run() {
   const command =
-      ['bazelisk'].concat(buildOptions).concat(['info', 'bazel-testlogs']);
+      ['bazelisk', 'info'].concat(buildOptions).concat(['bazel-testlogs']);
   const testlogsPath = await execBash([command.join(' ')]);
   const files = await findFiles(testlogsPath);
   if (files.length === 0) {
