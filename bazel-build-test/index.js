@@ -20,7 +20,7 @@ const exec = require('@actions/exec');
 const github = require('@actions/github');
 
 const common = require('./common');
-const {execBash, getInputBool, workspacePath} = common;
+const {execBash, workspacePath} = common;
 
 const validTestExitCodes = [
   0,  // Passes.
@@ -37,7 +37,7 @@ async function run() {
   const cacheVersion = core.getInput('cache-version');
   const cacheKey = `bazel-${cacheVersion}-${execRootHash}-${treeHash}`;
   const cachePaths = [outputBase];
-  if (getInputBool('restore-cache')) {
+  if (core.getBooleanInput('restore-cache')) {
     const restoreKeys = [`bazel-${cacheVersion}-${execRootHash}-`];
     await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
   }
