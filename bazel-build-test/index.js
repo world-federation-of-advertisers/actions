@@ -42,8 +42,9 @@ async function run() {
     await cache.restoreCache(cachePaths, cacheKey, restoreKeys);
   }
 
+  const testOutput = core.getInput('test-output');
   const buildOptions = ['--keep_going'].concat(common.buildOptions);
-  const testOptions = ['--test_output=errors'].concat(buildOptions);
+  const testOptions = [`--test_output=${testOutput}`].concat(buildOptions);
   const targetPatterns = core.getMultilineInput('target-patterns');
 
   await exec.exec(

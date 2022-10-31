@@ -47,6 +47,10 @@ inputs:
     description: Bazel targets to build and test. Newline-delimited.
     required: false
     default: '//...'
+  test-output:
+    description: Value of --test_output test option.
+    required: false
+    default: 'errors'
 runs:
   using: node16
   main: index.js
