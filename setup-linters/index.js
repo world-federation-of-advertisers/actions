@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const cache = require('@actions/cache');
 const core = require('@actions/core');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -67,51 +66,48 @@ function buildTool(name, version, sha256, ext = '') {
 
     async save() {
       await this.validate();
-      try {
-        const cacheId = await cache.saveCache([this.path], this.cacheKey);
-        core.info(`Saved ${this.cacheKey} to cache`);
-        return cacheId;
-      } catch (err) {
-        if (err.name === cache.ReserveCacheError.name) {
-          core.warning(err);
-        } else {
-          throw err;
-        }
-      }
+      const cacheId =
+          await tc.cacheFile(this.path, this.basename, this.name, this.version);
+      core.info(`Saved ${this.cacheKey} to tool cache`);
+      return cacheId;
     },
 
     async restore() {
-      const restoredKey = await cache.restoreCache([this.path], this.cacheKey);
-      if (!restoredKey) {
-        return restoredKey;
+      const restoredPath = tc.find(this.name, this.version);
+      if (!restoredPath) {
+        return false;
       }
+      await io.cp(restoredPath, this.path);
 
       try {
         await this.validate();
       } catch (err) {
         core.warning(err);
         await io.rmRF(this.path);
-        return undefined;
+        return false;
       }
-      core.info(`Restored ${this.cacheKey} from cache`);
-      return restoredKey;
+      core.info(`Restored ${this.cacheKey} from tool cache`);
+      return true;
     },
   };
 }
 
-function sha256HashFile(path) {
+async function sha256HashFile(path) {
   const hash = crypto.createHash('sha256').setEncoding('hex');
-  // TODO(actions/runner#772): Switch to using fs Promises API to create read
-  // stream once GitHub's JS actions can be run with Node.js 16+.
-  const input = fs.createReadStream(path);
-  return new Promise((resolve, reject) => {
-    input.on('end', () => {
-      hash.end();
-      resolve(hash.read());
+  const inputHandle = await fsPromises.open(path);
+  try {
+    const input = inputHandle.createReadStream();
+    return await new Promise((resolve, reject) => {
+      input.on('end', () => {
+        hash.end();
+        resolve(hash.read());
+      });
+      input.on('error', reject);
+      input.pipe(hash);
     });
-    input.on('error', reject);
-    input.pipe(hash);
-  });
+  } finally {
+    await inputHandle.close();
+  }
 }
 
 async function installExecutable(tool, url) {
@@ -133,6 +129,7 @@ async function installExecutableFromArchive(tool, url) {
   }
 
   // Download archive to temporary directory.
+  core.info(`Downloading ${tool.name}`);
   const tmpdir =
       await fsPromises.mkdtemp(path.join(process.env.RUNNER_TEMP, tool.name));
   const archiveName = tool.basename + '.tar.gz';
