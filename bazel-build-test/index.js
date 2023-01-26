@@ -50,6 +50,9 @@ async function run() {
   await exec.exec(
       'bazelisk', ['build'].concat(buildOptions).concat(targetPatterns),
       {cwd: workspacePath});
+  // Shut down Bazel server to reclaim memory used during build so that tests
+  // have more available.
+  await exec.exec('bazelisk', ['shutdown'], {cwd: workspacePath});
   const testExitCode = await exec.exec(
       'bazelisk', ['test'].concat(testOptions).concat(targetPatterns),
       {cwd: workspacePath, ignoreReturnCode: true});
