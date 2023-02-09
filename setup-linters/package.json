@@ -1,6 +1,6 @@
 {
   "name": "setup-linters",
-  "version": "1.8.2",
+  "version": "1.8.4",
   "description": "Javascript GitHub Action to set up linters.",
   "main": "index.js",
   "scripts": {
