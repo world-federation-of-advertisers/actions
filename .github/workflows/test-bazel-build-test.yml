@@ -55,6 +55,9 @@ jobs:
       uses: ./bazel-build-test
       with:
         workspace-path: .
+        cache-save-events: |
+          pull_request
+          push
   failing-test-target:
     name: Run with failing test target
     runs-on: ubuntu-20.04

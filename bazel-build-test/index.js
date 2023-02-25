@@ -32,7 +32,7 @@ async function run() {
   const execRootHash =
       await execBash([`echo -n '${execRoot}' | git hash-object --stdin`]);
   const treeHash = await execBash(['git rev-parse HEAD:']);
-  const outputBase = await execBash(['bazelisk info output_base'])
+  const outputBase = await execBash(['bazelisk info output_base']);
 
   const cacheVersion = core.getInput('cache-version');
   const cacheKey = `bazel-${cacheVersion}-${execRootHash}-${treeHash}`;
@@ -63,6 +63,11 @@ async function run() {
   const cacheSaveEvents = core.getMultilineInput('cache-save-events');
   if (targetPatterns.includes('//...') &&
       cacheSaveEvents.includes(github.context.eventName)) {
+    const excludedFileNamePatterns =
+        core.getMultilineInput('excluded-cache-file-patterns');
+    if (excludedFileNamePatterns.length > 0) {
+      await deleteExcludedFiles(excludedFileNamePatterns);
+    }
     try {
       await cache.saveCache(cachePaths, cacheKey);
     } catch (err) {
@@ -73,6 +78,22 @@ async function run() {
       }
     }
   }
+}
+
+async function deleteExcludedFiles(excludedFileNamePatterns) {
+  const findArgs = ['-type', 'f'];
+  for (let i = 0; i < excludedFileNamePatterns.length; i++) {
+    findArgs.push('-iname', excludedFileNamePatterns[i]);
+    if (i < excludedFileNamePatterns.length - 1) {
+      findArgs.push('-o');
+    }
+  }
+  findArgs.push('-delete');
+
+  const binDir = (await exec.getExecOutput('bazelisk', ['info', 'bazel-bin'], {
+                   cwd: workspacePath
+                 })).stdout.trimEnd();
+  await exec.exec('find', findArgs, {cwd: binDir});
 }
 
 (async function() {

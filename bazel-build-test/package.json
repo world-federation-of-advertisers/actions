@@ -1,6 +1,6 @@
 {
   "name": "bazel-build-test",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Javascript GitHub Action for building and testing with Bazel",
   "main": "index.js",
   "scripts": {
