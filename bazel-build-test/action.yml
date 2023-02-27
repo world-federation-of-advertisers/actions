@@ -31,6 +31,16 @@ inputs:
       Newline-delimited.
     required: false
     default: push
+  excluded-cache-file-patterns:
+    # TODO(actions/toolkit#184): Use list type rather than newline-delimited
+    # string once it's available.
+    description: >-
+      File name patterns to exclude from the cache. Newline-delimited.
+      
+      These are passed to the `-iname` option of GNU find. The exclusion is
+      implemented by deleting the files prior to saving the cache.
+    required: false
+    default: '*.tar'
   build-options:
     # TODO(actions/toolkit#184): Use list type rather than newline-delimited
     # string once it's available.
