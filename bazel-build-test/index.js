@@ -90,9 +90,11 @@ async function deleteExcludedFiles(excludedFileNamePatterns) {
   }
   findArgs.push('-delete');
 
-  const binDir = (await exec.getExecOutput('bazelisk', ['info', 'bazel-bin'], {
+  const bazelArgs = ['info'].concat(common.buildOptions).concat('bazel-bin');
+  const binDir = (await exec.getExecOutput('bazelisk', bazelArgs, {
                    cwd: workspacePath
                  })).stdout.trimEnd();
+
   await exec.exec('find', findArgs, {cwd: binDir});
 }
 
