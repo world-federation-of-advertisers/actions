@@ -17,9 +17,7 @@ description: |
   Run linters on files changed by a pull request.
 
   Requirements:
-    * Running on ubuntu-20.04.
-    * Linters are in $PATH.
-    * Default Java is JDK 11.
+    * Running on ubuntu-20.04 or newer.
     * Checked-out history includes pull request base.
 branding:
   icon: check-square
@@ -34,10 +32,13 @@ inputs:
 runs:
   using: composite
   steps:
-    # TODO(actions/virtual-environments#2455): Remove once this is in $PATH on ubuntu-20.04.
-    - name: Add ~/.local/bin to $PATH
-      shell: bash
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - uses: actions/setup-java@v2
+      with:
+        distribution: zulu
+        java-version: '11'
+
+    - name: Set up linters
+      uses: ./setup-linters
 
     - name: Install cpplint
       shell: bash
@@ -46,7 +47,8 @@ runs:
     - name: Lint
       shell: bash
       env:
-        # TODO(actions/runner#665): Remove once input vars are created by runner.
-        INPUT_LICENSE_TYPE: ${{ inputs.license-type }}
-        INPUT_COPYRIGHT_HOLDER: ${{ inputs.copyright-holder }}
-      run: ${{ github.action_path }}/lint.sh ${{ github.event.pull_request.base.sha }}
+        LICENSE_TYPE: ${{ inputs.license-type }}
+        COPYRIGHT_HOLDER: ${{ inputs.copyright-holder }}
+        BASE_REV: ${{ github.event.pull_request.base.sha }}
+      run: >
+        "$GITHUB_ACTION_PATH/lint.sh" "$BASE_REV"
