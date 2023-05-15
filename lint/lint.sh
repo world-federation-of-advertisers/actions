@@ -15,9 +15,6 @@
 
 set -eEu -o pipefail
 
-readonly LICENSE_TYPE="$INPUT_LICENSE_TYPE"
-readonly COPYRIGHT_HOLDER="$INPUT_COPYRIGHT_HOLDER"
-
 readonly ALL_FILES_PATTERN='.*'
 readonly KOTLIN_PATTERN='\.kts?$'
 readonly BAZEL_PATTERN='BUILD(\.bazel)?$|\.bzl$'
