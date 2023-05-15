@@ -1,0 +1,121 @@
+# Copyright 2021 The Cross-Media Measurement Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Exercise Bazel actions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-only:
+    name: Run build only
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'filegroup(name = "dummy_target")' > BUILD.bazel
+
+    - id: bazel-get-cache-params
+      uses: ./bazel-get-cache-params
+
+    - name: Restore Bazel cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
+        key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
+        restore-keys: |
+          ${{ steps.bazel-get-cache-params.outputs.restore-key }}
+
+    - name: Bazel build
+      run: bazelisk build //...
+  passing-test-target:
+    name: Run with passing test target
+    runs-on: ubuntu-20.04
+    env:
+      bazel-options: |-
+        --compilation_mode=opt
+    steps:
+    - uses: actions/checkout@v3
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'true' > test.sh
+        chmod u+x test.sh
+        echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - id: bazel-get-cache-params
+      uses: ./bazel-get-cache-params
+      with:
+        bazel-options: ${{ env.bazel-options }}
+
+    - name: Restore Bazel cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
+        key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
+        restore-keys: |-
+          ${{ steps.bazel-get-cache-params.outputs.restore-key }}
+
+    - name: Bazel test
+      run: bazelisk test ${{ env.bazel-options }} //...
+
+    - name: Upload Bazel testlogs
+      if: ${{ failure() }}
+      uses: ./bazel-upload-testlogs
+      with:
+        bazel-options: ${{ env.bazel-options }}
+
+    - name: Save Bazel cache
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
+        key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
+  failing-test-target:
+    name: Run with failing test target
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Init Bazel workspace
+      run: |
+        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        echo 'false' > test.sh
+        chmod u+x test.sh
+        echo 'sh_test(name = "failing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - id: bazel-get-cache-params
+      uses: ./bazel-get-cache-params
+
+    - name: Restore Bazel cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
+        key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
+        restore-keys: |-
+          ${{ steps.bazel-get-cache-params.outputs.restore-key }}
+
+    - name: Bazel test
+      id: bazel-test
+      continue-on-error: true
+      run: bazelisk test //...
+
+    - name: Upload Bazel testlogs
+      if: ${{ steps.bazel-test.outcome != 'success' }}
+      uses: ./bazel-upload-testlogs

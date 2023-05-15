@@ -1,0 +1,44 @@
+# Copyright 2023 The Cross-Media Measurement Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Bazel upload testlogs
+description: Upload Bazel testlogs artifact
+inputs:
+  workspace-path:
+    description: Path of Bazel workspace
+    required: false
+    default: .
+  bazel-options:
+    description: Options to pass to the Bazel command. Newline-delimited.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+  - name: Get testlogs path
+    id: get-testlogs-path
+    shell: bash
+    working-directory: ${{ inputs.workspace-path }}
+    env:
+      BAZEL_OPTIONS: ${{ inputs.bazel-options }}
+    run: |
+      [[ -n "$BAZEL_OPTIONS" ]] && readarray -t bazel_opts <<< "$BAZEL_OPTIONS"
+      testlogs_path="$(bazelisk info "${bazel_opts[@]}" bazel-testlogs)"
+      echo "testlogs-path=${testlogs_path}" >> $GITHUB_OUTPUT
+  - name: Upload artifact
+    uses: actions/upload-artifact@v3
+    with:
+      name: bazel-testlogs
+      path: ${{ steps.get-testlogs-path.outputs.testlogs-path }}

@@ -1,0 +1,59 @@
+# Copyright 2023 The Cross-Media Measurement Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Get Bazel cache parameters
+inputs:
+  workspace-path:
+    description: Path of Bazel workspace
+    required: false
+    default: .
+  cache-version:
+    description: Version of the GitHub Actions cache key.
+    required: false
+    default: 0
+  bazel-options:
+    description: Options to pass to the Bazel command. Newline-delimited.
+    required: false
+    default: ''
+outputs:
+  cache-key:
+    description: Bazel cache key
+    value: ${{ steps.get.outputs.cache-key }}
+  restore-key:
+    description: Bazel cache restore key
+    value: ${{ steps.get.outputs.restore-key }}
+  cache-path:
+    description: Path of Bazel cache
+    value: ${{ steps.get.outputs.cache-path }}
+runs:
+  using: composite
+  steps:
+  - id: get
+    shell: bash
+    working-directory: ${{ inputs.workspace-path }}
+    env:
+      CACHE_VERSION: ${{ inputs.cache-version }}
+      BAZEL_OPTIONS: ${{ inputs.bazel-options }}
+    run: |
+      [[ -n "$BAZEL_OPTIONS" ]] && readarray -t bazel_opts <<< "$BAZEL_OPTIONS"
+      cache_path="$(bazelisk info "${bazel_opts[@]}" output_base)"
+      exec_root="$(bazelisk info "${bazel_opts[@]}" execution_root)"
+      exec_root_hash="$(echo -n "${exec_root}" | git hash-object --stdin)"
+      tree_hash="$(git rev-parse HEAD:)"
+      cache_key="bazel-${CACHE_VERSION}-${exec_root_hash}-${tree_hash}"
+      restore_key="bazel-${CACHE_VERSION}-${exec_root_hash}-"
+
+      echo "cache-key=${cache_key}" >> $GITHUB_OUTPUT
+      echo "restore-key=${restore_key}" >> $GITHUB_OUTPUT
+      echo "cache-path=${cache_path}" >> $GITHUB_OUTPUT
