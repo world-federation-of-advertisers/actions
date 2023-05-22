@@ -32,6 +32,9 @@ outputs:
   cache-path:
     description: Path of Bazel cache
     value: ${{ steps.get.outputs.cache-path }}
+  bazel-bin:
+    description: Path of bazel-bin directory
+    value: ${{ steps.get.outputs.bazel-bin }}
 runs:
   using: composite
   steps:
@@ -41,6 +44,7 @@ runs:
     env:
       CACHE_VERSION: ${{ inputs.cache-version }}
     run: |
+      bazel_bin="$(bazelisk info bazel-bin)"
       cache_path="$(bazelisk info output_base)"
       exec_root="$(bazelisk info execution_root)"
       exec_root_hash="$(echo -n "${exec_root}" | git hash-object --stdin)"
@@ -51,3 +55,4 @@ runs:
       echo "cache-key=${cache_key}" >> $GITHUB_OUTPUT
       echo "restore-key=${restore_key}" >> $GITHUB_OUTPUT
       echo "cache-path=${cache_path}" >> $GITHUB_OUTPUT
+      echo "bazel-bin=${bazel_bin}" >> $GITHUB_OUTPUT
