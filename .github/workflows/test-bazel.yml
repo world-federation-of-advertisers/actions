@@ -48,9 +48,6 @@ jobs:
   passing-test-target:
     name: Run with passing test target
     runs-on: ubuntu-20.04
-    env:
-      bazel-options: |-
-        --compilation_mode=opt
     steps:
     - uses: actions/checkout@v3
     - name: Init Bazel workspace
@@ -60,10 +57,11 @@ jobs:
         chmod u+x test.sh
         echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
 
+    - name: Write ~/.bazelrc
+      run: echo 'build -c opt' > ~/.bazelrc
+
     - id: bazel-get-cache-params
       uses: ./bazel-get-cache-params
-      with:
-        bazel-options: ${{ env.bazel-options }}
 
     - name: Restore Bazel cache
       uses: actions/cache/restore@v3
@@ -79,8 +77,6 @@ jobs:
     - name: Upload Bazel testlogs
       if: ${{ failure() }}
       uses: ./bazel-upload-testlogs
-      with:
-        bazel-options: ${{ env.bazel-options }}
 
     - name: Save Bazel cache
       uses: actions/cache/save@v3
@@ -99,6 +95,9 @@ jobs:
         echo 'false' > test.sh
         chmod u+x test.sh
         echo 'sh_test(name = "failing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+    - name: Write ~/.bazelrc
+      run: echo 'build -c opt' > ~/.bazelrc
 
     - id: bazel-get-cache-params
       uses: ./bazel-get-cache-params
