@@ -43,6 +43,9 @@ const tools = Object.freeze({
   cue: buildTool(
       'cue', '0.4.3',
       '052063f3231aca8c2093ce96bc0a38328a45a6b77d5244f5e6ed08e19c79200a'),
+  apiLinter: buildTool(
+      'api-linter', '1.48.0',
+      '8bef98ba9d9be3783c7ab3288dcfe7ff0a5faf9900ef542049924610086401f7'),
 });
 
 function buildTool(name, version, sha256, ext = '') {
@@ -206,6 +209,14 @@ async function installCue() {
           tool.version}/${tool.name}_v${tool.version}_linux_amd64.tar.gz`);
 }
 
+async function installApiLinter() {
+  const tool = tools.apiLinter;
+  await installExecutableFromArchive(
+      tool,
+      `https://github.com/googleapis/${tool.name}/releases/download/v${
+          tool.version}/${tool.name}-${tool.version}-linux-amd64.tar.gz`);
+}
+
 async function run() {
   try {
     await fsPromises.mkdir(LINTERS_PATH, {recursive: true});
@@ -215,6 +226,7 @@ async function run() {
       installGoogleJavaFormat(),
       installAddlicense(),
       installCue(),
+      installApiLinter(),
     ]);
     core.addPath(LINTERS_PATH);
   } catch (err) {
