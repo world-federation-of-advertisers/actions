@@ -1,0 +1,45 @@
+# Copyright 2023 The Cross-Media Measurement Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Set up api-linter
+description: Installs api-linter to path
+inputs:
+  version:
+    description: api-linter release version
+    required: true
+  sha256:
+    description: SHA-256 digest of api-linter archive
+    required: true
+runs:
+  using: composite
+  steps:
+  - shell: bash
+    env:
+      VERSION: ${{ inputs.version }}
+    run: |
+      archive_name="api-linter-${VERSION}-linux-amd64.tar.gz"
+      archive_path="$HOME/${archive_name}"
+      curl -L "https://github.com/googleapis/api-linter/releases/download/v${VERSION}/${archive_name}" -o "${archive_path}"
+      echo "ARCHIVE_PATH=${archive_path}" >> "$GITHUB_ENV"
+
+  - shell: bash
+    env:
+      SHA256: ${{ inputs.sha256 }}
+    run: echo -e "${SHA256}\t${ARCHIVE_PATH}" | sha256sum --check
+
+  - shell: bash
+    run: |
+      bin="$HOME/.local/bin"
+      mkdir -p "${bin}"
+      tar -xf "$ARCHIVE_PATH" -C "${bin}"
