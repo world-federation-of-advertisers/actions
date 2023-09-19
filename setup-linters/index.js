@@ -37,8 +37,8 @@ const tools = Object.freeze({
       'a356bb0236b29c57a3ab678f17a7b027aad603b0960c183a18f1fe322e4f38ea',
       '.jar'),
   ktfmt: buildTool(
-      'ktfmt', '0.43',
-      'ed79f177ac714cf6cf7be4730a2ed061562f02bdb42bbf4bfa9ef2226d82ca45',
+      'ktfmt', '0.46',
+      '97fc7fbd194d01a9fa45d8147c0552403003d55bac4ab89d84d7bb4d5e3f48de',
       '.jar'),
   cue: buildTool(
       'cue', '0.4.3',
