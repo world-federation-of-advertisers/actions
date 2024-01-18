@@ -37,8 +37,8 @@ const tools = Object.freeze({
       'a356bb0236b29c57a3ab678f17a7b027aad603b0960c183a18f1fe322e4f38ea',
       '.jar'),
   ktfmt: buildTool(
-      'ktfmt', '0.46',
-      '97fc7fbd194d01a9fa45d8147c0552403003d55bac4ab89d84d7bb4d5e3f48de',
+      'ktfmt', '0.47',
+      'af61161faacd74ac56374e0b43003dbe742ddc0d6a7e2c1fe43e15415e65ffbd',
       '.jar'),
   cue: buildTool(
       'cue', '0.4.3',
@@ -181,7 +181,7 @@ async function installKtfmt() {
   if (!await tool.restore()) {
     core.info(`Downloading ${tool.name}`);
     await tc.downloadTool(
-        `https://search.maven.org/remotecontent?filepath=com/facebook/ktfmt/${
+        `https://repo1.maven.org/maven2/com/facebook/ktfmt/${
             tool.version}/ktfmt-${tool.version}-jar-with-dependencies.jar`,
         tool.path);
     await tool.save();
