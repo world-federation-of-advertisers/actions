@@ -1,6 +1,6 @@
 {
   "name": "setup-linters",
-  "version": "1.8.4",
+  "version": "2.3.0",
   "description": "Javascript GitHub Action to set up linters.",
   "main": "index.js",
   "scripts": {
@@ -9,8 +9,8 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/io": "^1.1.2",
+    "@actions/core": "^1.10.1",
+    "@actions/io": "^1.1.3",
     "@actions/tool-cache": "^2.0.1"
   }
 }
