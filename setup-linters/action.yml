@@ -15,5 +15,5 @@
 name: Set up linters
 description: Install linters, restoring from cache if available.
 runs:
-  using: node16
+  using: node20
   main: index.js

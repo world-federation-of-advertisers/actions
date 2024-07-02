@@ -32,7 +32,7 @@ runs:
       testlogs_path="$(bazelisk info bazel-testlogs)"
       echo "testlogs-path=${testlogs_path}" >> $GITHUB_OUTPUT
   - name: Upload artifact
-    uses: actions/upload-artifact@v3
+    uses: actions/upload-artifact@v4
     with:
       name: bazel-testlogs
       path: ${{ steps.get-testlogs-path.outputs.testlogs-path }}
