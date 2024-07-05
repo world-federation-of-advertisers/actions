@@ -23,9 +23,9 @@ on:
 jobs:
   build-only:
     name: Run build only
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Init Bazel workspace
       run: |
@@ -36,7 +36,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
@@ -47,9 +47,9 @@ jobs:
       run: bazelisk build //...
   passing-test-target:
     name: Run with passing test target
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Init Bazel workspace
       run: |
         echo 'workspace(name = "dummy_workspace")' > WORKSPACE
@@ -64,7 +64,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
@@ -79,15 +79,15 @@ jobs:
       uses: ./bazel-upload-testlogs
 
     - name: Save Bazel cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
   failing-test-target:
     name: Run with failing test target
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Init Bazel workspace
       run: |
@@ -103,7 +103,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
