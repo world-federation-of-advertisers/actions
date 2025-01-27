@@ -27,22 +27,22 @@ const EXECUTABLE_MODE = 0o755;
 
 const tools = Object.freeze({
   addlicense: buildTool(
-      'addlicense', '1.0.0',
-      'ac53b538d315abfb1c6e2cec5c6a7886397f1d1738a6b7abe6af2159ce614bee'),
+      'addlicense', '1.1.1',
+      'a44e8ad361baaed0cab3b9b7ed54bb1953fc0d1c908f571c9d983199da53b423'),
   buildifier: buildTool(
-      'buildifier', '5.1.0',
-      '52bf6b102cb4f88464e197caac06d69793fa2b05f5ad50a7e7bf6fbd656648a3'),
+      'buildifier', '8.0.1',
+      '1976053ed4decd6dd93170885b4387eddc76ec70dc2697b2e91a9af83269418a'),
   googleJavaFormat: buildTool(
-      'google-java-format', '1.15.0',
-      'a356bb0236b29c57a3ab678f17a7b027aad603b0960c183a18f1fe322e4f38ea',
+      'google-java-format', '1.25.2',
+      '25157797a0a972c2290b5bc71530c4f7ad646458025e3484412a6e5a9b8c9aa6',
       '.jar'),
   ktfmt: buildTool(
-      'ktfmt', '0.47',
-      'af61161faacd74ac56374e0b43003dbe742ddc0d6a7e2c1fe43e15415e65ffbd',
+      'ktfmt', '0.54',
+      '5e7eb28a0b2006d1cefbc9213bfc73a8191ec2f85d639ec4fc4ec0cd04212e82',
       '.jar'),
   cue: buildTool(
-      'cue', '0.4.3',
-      '052063f3231aca8c2093ce96bc0a38328a45a6b77d5244f5e6ed08e19c79200a'),
+      'cue', '0.5.0',
+      '6b06b37b9826ae030d65cf2a21604634271df839e5f463e99257ad5ea69f16b7'),
 });
 
 function buildTool(name, version, sha256, ext = '') {
@@ -148,7 +148,7 @@ async function installBuildifier() {
   const tool = tools.buildifier;
   await installExecutable(
       tool,
-      `https://github.com/bazelbuild/buildtools/releases/download/${
+      `https://github.com/bazelbuild/buildtools/releases/download/v${
           tool.version}/buildifier-linux-amd64`);
 }
 
