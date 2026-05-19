@@ -50,12 +50,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Init Bazel workspace
+    - name: Init Bazel Module
       run: |
-        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        cat > MODULE.bazel <<'EOF'
+        module(name = "dummy_workspace")
+        bazel_dep(name = "rules_shell", version = "0.8.0")
+        EOF
+
         echo 'true' > test.sh
         chmod u+x test.sh
-        echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+        cat > BUILD.bazel <<'EOF'
+        load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+        sh_test(name = "passing_test", srcs = ["test.sh"])
+        EOF
 
     - name: Write ~/.bazelrc
       run: echo 'build -c opt' > ~/.bazelrc
@@ -89,12 +98,21 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Init Bazel workspace
+    - name: Init Bazel Module
       run: |
-        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        cat > MODULE.bazel <<'EOF'
+        module(name = "dummy_workspace")
+        bazel_dep(name = "rules_shell", version = "0.8.0")
+        EOF
+
         echo 'false' > test.sh
         chmod u+x test.sh
-        echo 'sh_test(name = "failing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+        cat > BUILD.bazel <<'EOF'
+        load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+        sh_test(name = "passing_test", srcs = ["test.sh"])
+        EOF
 
     - name: Write ~/.bazelrc
       run: echo 'build -c opt' > ~/.bazelrc
