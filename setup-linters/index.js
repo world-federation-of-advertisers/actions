@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-const core = require('@actions/core');
-const crypto = require('crypto');
-const fs = require('fs');
-const io = require('@actions/io');
-const path = require('path');
-const tc = require('@actions/tool-cache');
+import * as core from '@actions/core';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import * as io from '@actions/io';
+import path from 'node:path';
+import * as tc from '@actions/tool-cache';
+
 const fsPromises = fs.promises;
 
 const LINTERS_PATH = path.join(process.env.HOME, 'lint');

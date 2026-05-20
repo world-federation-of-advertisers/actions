@@ -2,6 +2,7 @@
   "name": "setup-linters",
   "version": "2.5.0",
   "description": "Javascript GitHub Action to set up linters.",
+  "type": "module",  
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
