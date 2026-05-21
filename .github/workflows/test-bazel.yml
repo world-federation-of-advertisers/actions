@@ -23,9 +23,9 @@ on:
 jobs:
   build-only:
     name: Run build only
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Init Bazel workspace
       run: |
@@ -36,7 +36,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
@@ -47,15 +47,24 @@ jobs:
       run: bazelisk build //...
   passing-test-target:
     name: Run with passing test target
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
-    - name: Init Bazel workspace
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Init Bazel Module
       run: |
-        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        cat > MODULE.bazel <<'EOF'
+        module(name = "dummy_workspace")
+        bazel_dep(name = "rules_shell", version = "0.8.0")
+        EOF
+
         echo 'true' > test.sh
         chmod u+x test.sh
-        echo 'sh_test(name = "passing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+        cat > BUILD.bazel <<'EOF'
+        load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+        sh_test(name = "passing_test", srcs = ["test.sh"])
+        EOF
 
     - name: Write ~/.bazelrc
       run: echo 'build -c opt' > ~/.bazelrc
@@ -64,7 +73,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
@@ -79,22 +88,31 @@ jobs:
       uses: ./bazel-upload-testlogs
 
     - name: Save Bazel cache
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
   failing-test-target:
     name: Run with failing test target
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Init Bazel workspace
+    - name: Init Bazel Module
       run: |
-        echo 'workspace(name = "dummy_workspace")' > WORKSPACE
+        cat > MODULE.bazel <<'EOF'
+        module(name = "dummy_workspace")
+        bazel_dep(name = "rules_shell", version = "0.8.0")
+        EOF
+
         echo 'false' > test.sh
         chmod u+x test.sh
-        echo 'sh_test(name = "failing_test", srcs = ["test.sh"])' > BUILD.bazel
+
+        cat > BUILD.bazel <<'EOF'
+        load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+        sh_test(name = "passing_test", srcs = ["test.sh"])
+        EOF
 
     - name: Write ~/.bazelrc
       run: echo 'build -c opt' > ~/.bazelrc
@@ -103,7 +121,7 @@ jobs:
       uses: ./bazel-get-cache-params
 
     - name: Restore Bazel cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
       with:
         path: ${{ steps.bazel-get-cache-params.outputs.cache-path }}
         key: ${{ steps.bazel-get-cache-params.outputs.cache-key }}
