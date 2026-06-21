@@ -50,6 +50,10 @@ runs:
       shell: bash
       run: pip3 install --user cpplint
 
+    - name: Install gts
+      shell: bash
+      run: npm install --save-dev gts eslint eslint-config-react-app prettier
+
     - name: Lint
       shell: bash
       env:

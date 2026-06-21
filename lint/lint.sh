@@ -22,6 +22,7 @@ readonly CPP_OR_PROTO_PATTERN='\.(cc|h|proto)$'
 readonly CPP_PATTERN='\.(cc|h)$'
 readonly JAVA_PATTERN='\.java$'
 readonly CUE_PATTERN='\.cue$'
+readonly TS_PATTERN='\.(ts|tsx)$'
 
 # Reads exclude pathspecs from the .lintignore file into the specified array.
 read_exclude_pathspecs() {
@@ -131,6 +132,10 @@ google_java_format_cmd() {
   google-java-format --dry-run "$@"
 }
 
+typescript_fmt_cmd() {
+  npx gts lint --dry-run "$@"
+}
+
 # Runs the linter command on changed files with the specified regex pattern.
 #
 # Scope vars:
@@ -173,6 +178,7 @@ main() {
   run_linter cpplint_cmd "${CPP_PATTERN}" || has_errors=1
   run_linter google_java_format_cmd "${JAVA_PATTERN}" || has_errors=1
   run_linter cue_fmt_cmd "${CUE_PATTERN}" || has_errors=1
+  run_linter typescript_fmt_cmd "${TS_PATTERN}" || has_errors=1
 
   ! ((has_errors))
 }
