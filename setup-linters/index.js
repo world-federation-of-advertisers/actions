@@ -182,7 +182,7 @@ async function installKtfmt() {
   if (!await tool.restore()) {
     core.info(`Downloading ${tool.name}`);
     await tc.downloadTool(
-        `https://repo1.maven.org/maven2/com/facebook/ktfmt/${
+        `https://maven-central.storage-download.googleapis.com/maven2/com/facebook/ktfmt/${
             tool.version}/ktfmt-${tool.version}-jar-with-dependencies.jar`,
         tool.path);
     await tool.save();
